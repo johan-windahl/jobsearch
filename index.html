@@ -24,12 +24,43 @@
       .job-description.show {
         display: block; /* Show when the 'show' class is added */
       }
+      .tooltip {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+      }
+      .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 200px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%; /* Position the tooltip above the text */
+        left: 50%;
+        margin-left: -100px;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   </head>
   <body class="bg-gray-100">
     <div class="container mx-auto p-4">
       <h1 class="text-3xl font-bold mb-6 text-center">Job Listings</h1>
+      <div class="mb-4">
+        <span id="job-count" class="tooltip text-lg font-semibold">
+          Available Jobs: <span id="job-count-number">0</span>
+          <span class="tooltiptext" id="job-breakdown"></span>
+        </span>
+      </div>
       <input
         type="text"
         id="location-search"
@@ -51,6 +82,26 @@
       function convertTimestampToDate(timestamp) {
         const date = new Date(timestamp);
         return date.toDateString();
+      }
+
+      function updateJobCount(jobs) {
+        const jobCountElement = document.getElementById("job-count-number");
+        const jobBreakdownElement = document.getElementById("job-breakdown");
+
+        jobCountElement.textContent = jobs.length;
+
+        const jobDates = {};
+        jobs.forEach((job) => {
+          const date = convertTimestampToDate(job.date_posted);
+          if (!jobDates[date]) {
+            jobDates[date] = 0;
+          }
+          jobDates[date]++;
+        });
+
+        jobBreakdownElement.innerHTML = Object.keys(jobDates)
+          .map((date) => `${date}: ${jobDates[date]} jobs`)
+          .join("<br>");
       }
 
       function displayJobs(jobs) {
@@ -128,6 +179,8 @@
 
           jobsContainer.appendChild(jobContainer);
         });
+
+        updateJobCount(jobs);
       }
 
       function filterJobs() {
