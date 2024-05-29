@@ -101,7 +101,13 @@
           jobUrlElement.href = job.job_url;
           jobUrlElement.target = "_blank";
           jobUrlElement.className = "text-blue-500 hover:underline";
-          jobUrlElement.textContent = "View Job";
+          if (job.job_url.includes("linkedin")) {
+            jobUrlElement.textContent = "View Job @ LinkedIn";
+          } else if (job.job_url.includes("indeed")) {
+            jobUrlElement.textContent = "View Job @ Indeed";
+          } else {
+            jobUrlElement.textContent = "View Job";
+          }
 
           const toggleButton = document.createElement("button");
           toggleButton.className = "text-blue-500 hover:underline mt-2 px-4";
@@ -169,7 +175,7 @@
         try {
           const response = await fetch("jobs.json");
           const jobs = await response.json();
-          allJobs = jobs;
+          allJobs = jobs.sort((a, b) => b.date_posted - a.date_posted);
           displayJobs(jobs);
         } catch (error) {
           console.error("Error fetching jobs:", error);
